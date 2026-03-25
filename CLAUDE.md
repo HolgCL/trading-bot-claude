@@ -28,7 +28,9 @@ The platform has five layers that flow left-to-right:
 **Data → Indicators → Strategy → Backtester → UI**
 
 ### Data layer (`data/`)
-`DataFetcher` fetches OHLCV candles from Binance via `ccxt`, paginates automatically, and delegates caching to `CacheManager` (parquet files in `cache/`). Cache key is `{symbol}_{timeframe}_{start}_{end}.parquet`. Returns a `pd.DataFrame` with a UTC `DatetimeTzDtype` index and float columns `open/high/low/close/volume`.
+`DataFetcher(exchange_id="bybit")` fetches OHLCV candles via `ccxt`, paginates automatically, and delegates caching to `CacheManager` (parquet files in `/tmp/trading_bot_cache/`). Cache key includes the exchange id: `{exchange}_{symbol}_{timeframe}_{start}_{end}.parquet`. Returns a `pd.DataFrame` with a UTC `DatetimeTzDtype` index and float columns `open/high/low/close/volume`.
+
+Supported exchanges (see `SUPPORTED_EXCHANGES` in `data/fetcher.py`): **bybit** (default, works on Streamlit Cloud), binance (blocked on US IPs), okx, kraken. **Binance is geo-blocked on Streamlit Cloud** — always use bybit or okx for cloud deployment.
 
 ### Indicators layer (`indicators/`)
 `IndicatorLibrary` is injected into every strategy as `self.indicators`. It wraps the `ta` library behind named methods and caches results within a single backtest run:
