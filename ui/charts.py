@@ -108,3 +108,71 @@ def render_indicator_chart(
         fig.add_hline(y=level, line_dash="dot", line_color="gray")
     fig.update_layout(title=title, height=220, template="plotly_dark")
     return fig
+
+
+def render_keltner_chart(df: pd.DataFrame, kc: pd.DataFrame) -> go.Figure:
+    """Price chart with Keltner Channel bands overlaid."""
+    fig = go.Figure()
+
+    fig.add_trace(go.Candlestick(
+        x=df.index,
+        open=df["open"], high=df["high"],
+        low=df["low"], close=df["close"],
+        name="Price",
+        increasing_line_color="#26a69a",
+        decreasing_line_color="#ef5350",
+    ))
+    fig.add_trace(go.Scatter(
+        x=kc.index, y=kc["upper"],
+        mode="lines", name="KC Upper",
+        line=dict(color="#ff9800", width=1, dash="dot"),
+    ))
+    fig.add_trace(go.Scatter(
+        x=kc.index, y=kc["mid"],
+        mode="lines", name="KC Mid (EMA)",
+        line=dict(color="#ffeb3b", width=1.5),
+    ))
+    fig.add_trace(go.Scatter(
+        x=kc.index, y=kc["lower"],
+        mode="lines", name="KC Lower",
+        line=dict(color="#ff9800", width=1, dash="dot"),
+        fill="tonexty",
+        fillcolor="rgba(255, 152, 0, 0.05)",
+    ))
+    fig.update_layout(
+        title="Keltner Channel (period=20, ATR×2.25)",
+        xaxis_rangeslider_visible=False,
+        height=450,
+        template="plotly_dark",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02),
+    )
+    return fig
+
+
+def render_macd_chart(macd_df: pd.DataFrame) -> go.Figure:
+    """MACD line, signal line, and histogram."""
+    fig = make_subplots(rows=1, cols=1)
+
+    colors = ["#26a69a" if v >= 0 else "#ef5350" for v in macd_df["histogram"]]
+    fig.add_trace(go.Bar(
+        x=macd_df.index, y=macd_df["histogram"],
+        name="Histogram", marker_color=colors, opacity=0.7,
+    ))
+    fig.add_trace(go.Scatter(
+        x=macd_df.index, y=macd_df["macd"],
+        mode="lines", name="MACD",
+        line=dict(color="#42a5f5", width=1.5),
+    ))
+    fig.add_trace(go.Scatter(
+        x=macd_df.index, y=macd_df["signal"],
+        mode="lines", name="Signal",
+        line=dict(color="#ff7043", width=1.5),
+    ))
+    fig.add_hline(y=0, line_dash="dot", line_color="gray")
+    fig.update_layout(
+        title="MACD (12, 26, 9)",
+        height=250,
+        template="plotly_dark",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02),
+    )
+    return fig

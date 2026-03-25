@@ -14,7 +14,10 @@ st.set_page_config(
 )
 
 from ui.sidebar import render_sidebar
-from ui.charts import render_price_chart, render_equity_chart, render_indicator_chart
+from ui.charts import (
+    render_price_chart, render_equity_chart, render_indicator_chart,
+    render_keltner_chart, render_macd_chart,
+)
 from ui.metrics_table import render_metrics
 from data.fetcher import DataFetcher
 from backtester.engine import Backtester
@@ -57,15 +60,31 @@ if run:
             use_container_width=True,
         )
 
-        # Optional indicator subplot
-        with st.expander("Show RSI indicator"):
-            from indicators.registry import IndicatorLibrary
-            lib = IndicatorLibrary(df)
-            rsi = lib.rsi()
-            st.plotly_chart(
-                render_indicator_chart(df, rsi, "RSI (14)", hlines=[30, 70]),
-                use_container_width=True,
-            )
+        # Indicator subplots
+        from indicators.registry import IndicatorLibrary
+        from strategies.keltner_macd import KeltnerMACDStrategy
+        lib = IndicatorLibrary(df)
+
+        if isinstance(strategy, KeltnerMACDStrategy):
+            with st.expander("Keltner Channel", expanded=True):
+                kc = lib.keltner(
+                    period=strategy.kc_period, multiplier=strategy.kc_multiplier
+                )
+                st.plotly_chart(render_keltner_chart(df, kc), use_container_width=True)
+            with st.expander("MACD", expanded=True):
+                macd = lib.macd(
+                    fast=strategy.macd_fast,
+                    slow=strategy.macd_slow,
+                    signal=strategy.macd_signal,
+                )
+                st.plotly_chart(render_macd_chart(macd), use_container_width=True)
+        else:
+            with st.expander("Show RSI indicator"):
+                rsi = lib.rsi()
+                st.plotly_chart(
+                    render_indicator_chart(df, rsi, "RSI (14)", hlines=[30, 70]),
+                    use_container_width=True,
+                )
 
     with col_metrics:
         render_metrics(result.metrics)

@@ -7,10 +7,12 @@ import streamlit as st
 from backtester.engine import BacktestConfig
 from strategies.rsi_mean_reversion import RSIMeanReversionStrategy
 from strategies.macd_crossover import MACDCrossoverStrategy
+from strategies.keltner_macd import KeltnerMACDStrategy
 
 STRATEGY_MAP = {
     RSIMeanReversionStrategy.name: RSIMeanReversionStrategy,
     MACDCrossoverStrategy.name: MACDCrossoverStrategy,
+    KeltnerMACDStrategy.name: KeltnerMACDStrategy,
 }
 
 TIMEFRAME_OPTIONS = ["1h", "4h", "1d", "15m", "30m", "2h", "6h", "12h"]
@@ -96,6 +98,27 @@ def _build_strategy(strategy_cls):
         slow = st.sidebar.slider("Slow Period", 15, 60, 26)
         signal = st.sidebar.slider("Signal Period", 3, 20, 9)
         return MACDCrossoverStrategy(fast=fast, slow=slow, signal=signal)
+
+    elif strategy_cls is KeltnerMACDStrategy:
+        st.sidebar.markdown("**Keltner Channel**")
+        kc_period = st.sidebar.slider("KC Period", 10, 50, 20)
+        kc_multiplier = st.sidebar.slider("ATR Multiplier", 1.0, 4.0, 2.25, step=0.05)
+        exit_at_mid = st.sidebar.radio(
+            "Exit Target", ["Middle line (EMA)", "Upper band"],
+            index=0,
+        ) == "Middle line (EMA)"
+        st.sidebar.markdown("**MACD**")
+        macd_fast = st.sidebar.slider("MACD Fast", 5, 30, 12)
+        macd_slow = st.sidebar.slider("MACD Slow", 15, 60, 26)
+        macd_signal = st.sidebar.slider("MACD Signal", 3, 20, 9)
+        return KeltnerMACDStrategy(
+            kc_period=kc_period,
+            kc_multiplier=kc_multiplier,
+            macd_fast=macd_fast,
+            macd_slow=macd_slow,
+            macd_signal=macd_signal,
+            exit_at_mid=exit_at_mid,
+        )
 
     # Default: instantiate with no args
     return strategy_cls()

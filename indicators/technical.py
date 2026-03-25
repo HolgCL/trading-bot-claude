@@ -74,3 +74,30 @@ class VWAP(BaseIndicator):
             high=df["high"], low=df["low"], close=df["close"],
             volume=df["volume"], window=period,
         ).volume_weighted_average_price().rename("vwap")
+
+
+class KeltnerChannel(BaseIndicator):
+    """
+    Keltner Channel: EMA of close ± multiplier * ATR.
+    BUY signal when price breaks above upper band (momentum),
+    or mean-reversion when price drops below lower band.
+    """
+    name = "keltner"
+
+    def compute(
+        self,
+        df: pd.DataFrame,
+        period: int = 20,
+        multiplier: float = 2.25,
+        original_version: bool = False,
+    ) -> pd.DataFrame:
+        ind = tv.KeltnerChannel(
+            high=df["high"], low=df["low"], close=df["close"],
+            window=period, multiplier=multiplier,
+            original_version=original_version,
+        )
+        return pd.DataFrame({
+            "lower": ind.keltner_channel_lband(),
+            "mid":   ind.keltner_channel_mband(),
+            "upper": ind.keltner_channel_hband(),
+        }, index=df.index)

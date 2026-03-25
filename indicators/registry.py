@@ -1,7 +1,7 @@
 import pandas as pd
 
 from indicators.base import BaseIndicator
-from indicators.technical import RSI, MACD, BollingerBands, SMA, EMA, OBV, VWAP
+from indicators.technical import RSI, MACD, BollingerBands, SMA, EMA, OBV, VWAP, KeltnerChannel
 
 
 class IndicatorLibrary:
@@ -21,7 +21,7 @@ class IndicatorLibrary:
         self._df = df
         self._cache: dict[str, "pd.Series | pd.DataFrame"] = {}
         self._registry: dict[str, BaseIndicator] = {
-            ind.name: ind for ind in [RSI(), MACD(), BollingerBands(), SMA(), EMA(), OBV(), VWAP()]
+            ind.name: ind for ind in [RSI(), MACD(), BollingerBands(), SMA(), EMA(), OBV(), VWAP(), KeltnerChannel()]
         }
 
     def _get(self, name: str, **kwargs):
@@ -52,6 +52,12 @@ class IndicatorLibrary:
 
     def vwap(self, period: int = 14) -> pd.Series:
         return self._get("vwap", period=period)
+
+    def keltner(
+        self, period: int = 20, multiplier: float = 2.25, original_version: bool = False
+    ) -> pd.DataFrame:
+        """Returns DataFrame with columns: lower, mid, upper."""
+        return self._get("keltner", period=period, multiplier=multiplier, original_version=original_version)
 
     # --- Custom / ML indicators ---
 
