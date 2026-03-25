@@ -79,6 +79,17 @@ When `KeltnerMACDStrategy` is selected, `app/main.py` renders dedicated `render_
 2. Add it to `STRATEGY_MAP` in `ui/sidebar.py`
 3. Add parameter sliders in `_build_strategy()` in `ui/sidebar.py`
 
+## Deployment
+
+The app is deployed on **Streamlit Community Cloud** via `streamlit_app.py` (root-level entry point).
+
+- `streamlit_app.py` — cloud entry point; wraps data fetching with `@st.cache_data(ttl=3600)`
+- `app/main.py` — local development entry point (identical logic, uses parquet file cache)
+- `.streamlit/config.toml` — dark theme settings
+- Cache directory: auto-detected — `/tmp/trading_bot_cache` on cloud, same on local
+
+To redeploy: just push to `main`. Streamlit Cloud auto-deploys on every push.
+
 ## Key design constraints
 
 - **Signal execution**: signals are always vectorised (whole DataFrame at once), never bar-by-bar in Python. This keeps backtests fast but means `generate_signals` must avoid using future data.
