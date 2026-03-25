@@ -1,3 +1,6 @@
+import os
+import tempfile
+
 import ccxt
 import pandas as pd
 from datetime import datetime
@@ -5,18 +8,21 @@ from datetime import datetime
 from data.cache import CacheManager
 from data.schema import OHLCV_COLUMNS
 
+# Use /tmp on cloud (ephemeral) or local cache/ in dev
+_DEFAULT_CACHE_DIR = os.path.join(tempfile.gettempdir(), "trading_bot_cache")
+
 
 class DataFetcher:
     """Fetches historical OHLCV candles from Binance with local parquet cache."""
 
-    def __init__(self, api_key: str = "", api_secret: str = "", cache_dir: str = "cache/"):
+    def __init__(self, api_key: str = "", api_secret: str = "", cache_dir: str | None = None):
         self._exchange = ccxt.binance({
             "apiKey": api_key,
             "secret": api_secret,
             "enableRateLimit": True,
             "options": {"defaultType": "spot"},
         })
-        self._cache = CacheManager(cache_dir)
+        self._cache = CacheManager(cache_dir or _DEFAULT_CACHE_DIR)
 
     def fetch(
         self,
