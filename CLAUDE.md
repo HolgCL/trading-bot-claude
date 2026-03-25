@@ -30,7 +30,7 @@ The platform has five layers that flow left-to-right:
 ### Data layer (`data/`)
 `DataFetcher(exchange_id="bybit")` fetches OHLCV candles via `ccxt`, paginates automatically, and delegates caching to `CacheManager` (parquet files in `/tmp/trading_bot_cache/`). Cache key includes the exchange id: `{exchange}_{symbol}_{timeframe}_{start}_{end}.parquet`. Returns a `pd.DataFrame` with a UTC `DatetimeTzDtype` index and float columns `open/high/low/close/volume`.
 
-Supported exchanges (see `SUPPORTED_EXCHANGES` in `data/fetcher.py`): **bybit** (default, works on Streamlit Cloud), binance (blocked on US IPs), okx, kraken. **Binance is geo-blocked on Streamlit Cloud** — always use bybit or okx for cloud deployment.
+Default source is **Yahoo Finance** (`exchange_id="yahoo"`) — no geo-restrictions, works on Streamlit Cloud and all platforms. Symbol mapping: `BTC/USDT` → `BTC-USD`, `ETH/USDT` → `ETH-USD`. Timeframes not natively supported by yfinance (4h, 2h, 6h...) are resampled from 1h data. ccxt exchanges (Binance, Bybit, OKX) are available for local use but **blocked on Streamlit Cloud AWS IPs**.
 
 ### Indicators layer (`indicators/`)
 `IndicatorLibrary` is injected into every strategy as `self.indicators`. It wraps the `ta` library behind named methods and caches results within a single backtest run:
