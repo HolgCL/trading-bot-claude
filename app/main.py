@@ -24,16 +24,16 @@ from backtester.engine import Backtester
 
 
 st.title("📈 Cryptocurrency Backtesting Platform")
-st.caption("Test trading strategies on historical Binance data")
+st.caption("Test trading strategies on historical crypto data")
 
-config, strategy, symbol, timeframe, start_dt, end_dt = render_sidebar()
+config, strategy, symbol, timeframe, start_dt, end_dt, exchange_id = render_sidebar()
 
 run = st.sidebar.button("▶ Run Backtest", type="primary", use_container_width=True)
 
 if run:
-    with st.spinner(f"Downloading {symbol} {timeframe} data..."):
+    with st.spinner(f"Downloading {symbol} {timeframe} data from {exchange_id}..."):
         try:
-            fetcher = DataFetcher()
+            fetcher = DataFetcher(exchange_id=exchange_id)
             df = fetcher.fetch(symbol, timeframe, start_dt, end_dt)
         except Exception as e:
             st.error(f"Failed to fetch data: {e}")

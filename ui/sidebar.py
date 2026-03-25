@@ -5,6 +5,7 @@ from datetime import datetime, date, timedelta
 import streamlit as st
 
 from backtester.engine import BacktestConfig
+from data.fetcher import SUPPORTED_EXCHANGES
 from strategies.rsi_mean_reversion import RSIMeanReversionStrategy
 from strategies.macd_crossover import MACDCrossoverStrategy
 from strategies.keltner_macd import KeltnerMACDStrategy
@@ -24,6 +25,14 @@ def render_sidebar():
     Data is fetched here so the user sees a spinner in the sidebar.
     """
     st.sidebar.header("Backtest Settings")
+
+    # Exchange
+    exchange_id = st.sidebar.selectbox(
+        "Exchange",
+        options=list(SUPPORTED_EXCHANGES.keys()),
+        format_func=lambda x: SUPPORTED_EXCHANGES[x],
+        index=0,  # bybit by default
+    )
 
     # Symbol
     symbol = st.sidebar.text_input("Symbol", value="BTC/USDT")
@@ -74,7 +83,7 @@ def render_sidebar():
     start_dt = datetime.combine(start_date, datetime.min.time())
     end_dt = datetime.combine(end_date, datetime.min.time())
 
-    return config, strategy, symbol, timeframe, start_dt, end_dt
+    return config, strategy, symbol, timeframe, start_dt, end_dt, exchange_id
 
 
 def _build_strategy(strategy_cls):

@@ -30,22 +30,22 @@ from strategies.keltner_macd import KeltnerMACDStrategy
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def load_data(symbol: str, timeframe: str, start: datetime, end: datetime):
-    """Cache Binance data for 1 hour to avoid re-fetching on every Streamlit rerun."""
-    return DataFetcher().fetch(symbol, timeframe, start, end)
+def load_data(exchange_id: str, symbol: str, timeframe: str, start: datetime, end: datetime):
+    """Cache OHLCV data for 1 hour to avoid re-fetching on every Streamlit rerun."""
+    return DataFetcher(exchange_id=exchange_id).fetch(symbol, timeframe, start, end)
 
 
 st.title("📈 Cryptocurrency Backtesting Platform")
 st.caption("Test trading strategies on historical Binance data")
 
-config, strategy, symbol, timeframe, start_dt, end_dt = render_sidebar()
+config, strategy, symbol, timeframe, start_dt, end_dt, exchange_id = render_sidebar()
 
 run = st.sidebar.button("▶ Run Backtest", type="primary", use_container_width=True)
 
 if run:
     with st.spinner(f"Downloading {symbol} {timeframe} data..."):
         try:
-            df = load_data(symbol, timeframe, start_dt, end_dt)
+            df = load_data(exchange_id, symbol, timeframe, start_dt, end_dt)
         except Exception as e:
             st.error(f"Failed to fetch data: {e}")
             st.stop()
