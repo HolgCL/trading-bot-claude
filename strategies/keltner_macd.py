@@ -28,8 +28,8 @@ class KeltnerMACDStrategy(Strategy):
 
     name = "Keltner Channel + MACD"
     description = (
-        "Покупка на откате к нижней полосе Кельтнера при развороте MACD вверх. "
-        "Выход на средней линии или верхней полосе."
+        "Buy on a pullback to the lower Keltner band when the MACD turns up."
+        "Exit on the middle line or top lane."
     )
 
     def __init__(
